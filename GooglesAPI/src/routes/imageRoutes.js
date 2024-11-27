@@ -1,8 +1,10 @@
-const express = require('express');
+import express from 'express';
+import upload from '../middlewares/upload.js';
+import analyzeImages from '../controllers/validationImage.js';
+
 const router = express.Router();
-const upload = require('../middlewares/upload');
-const analyzeImages = require('../controllers/validationImage');
 
 router.post('/analyze', upload, analyzeImages);
 
-module.exports = router;
+export default router;
+    
