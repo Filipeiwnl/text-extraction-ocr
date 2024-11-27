@@ -7,8 +7,6 @@ import { cpf as cpfValidator } from 'cpf-cnpj-validator';
 const regexCpf = /(?:CPF|C\.?P\.?F\.?):?\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/i;
 const regexDate = /\b\d{2}\/\d{2}\/\d{4}\b/; // Datas no formato DD/MM/YYYY
 const regexRg = /\b\d{2}\.\d{3}\.\d{3}-?\d?\b/; // RG no formato XX.XXX.XXX-X
-const regexParents = /(?:Filiação|Pai|Mãe):?\s*([\s\S]+?)\n/i; 
-const regexNaturalidade = /(Naturalidade|NATURALIDADE):?\s*(.+)/i;
 
 // Pré-processamento da imagem
 const preprocessImage = async (imagePath) => {
@@ -39,6 +37,18 @@ const extractParents = (textLines) => {
     if (parentsIndex !== -1) {
         const parentLines = textLines.slice(parentsIndex + 1, parentsIndex + 3); // Captura as duas linhas seguintes
         return parentLines.join(' ').trim(); // Une os nomes em uma única string
+    }
+    return null;
+};
+
+// Função para capturar Naturalidade
+const extractNaturalidade = (textLines) => {
+    const naturalidadeLine = textLines.find((line) =>
+        line.toLowerCase().includes('naturalidade')
+    );
+    if (naturalidadeLine) {
+        // Remove o rótulo e retorna apenas o valor
+        return naturalidadeLine.replace(/.*naturalidade:?\s*/i, '').trim();
     }
     return null;
 };
@@ -79,8 +89,8 @@ const analyzeImages = async (req, res) => {
         const cpfValid = cpf && cpfValidator.isValid(cpf) ? cpf : null;
         const birthDate = textLines.find((line) => regexDate.test(line))?.match(regexDate)?.[0] || null;
         const rg = textLines.find((line) => regexRg.test(line))?.match(regexRg)?.[0] || null;
-        const parents = extractParents(textLines); // Chama a função dinâmica para capturar os nomes
-        const naturalidade = textLines.find((line) => line.toLowerCase().includes('naturalidade')) || null;
+        const parents = extractParents(textLines);
+        const naturalidade = extractNaturalidade(textLines); // Captura apenas o valor da naturalidade
 
         res.json({
             message: 'Dados extraídos com sucesso',
