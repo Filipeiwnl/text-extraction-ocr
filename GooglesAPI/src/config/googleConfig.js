@@ -1,5 +1,8 @@
-const vision = require(`@google-cloud/vision`)
+import vision from '@google-cloud/vision';
 
-const client = new vision.ImageAnnotatorClient({})
 
-module.exports = client
+const client = new vision.ImageAnnotatorClient({
+    keyFilename: './GoogleKeyVisionAPI.json', 
+});
+
+export default client;

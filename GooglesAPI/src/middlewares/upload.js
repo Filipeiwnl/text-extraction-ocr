@@ -1,18 +1,16 @@
-const multer = require('multer');
-const path = require('path');
+import multer from 'multer';
+import path from 'path';
 
 // Configurações gerais
 const UPLOADS_DIR = path.resolve('uploads');
-const MAX_FILE_SIZE = 5 * 1024 * 1024; 
-const ALLOWED_TYPES = /jpeg|jpg|png|gif/;
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB por arquivo
+const ALLOWED_TYPES = /jpeg|jpg|png/;
 
 // Configuração de armazenamento
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, UPLOADS_DIR);
-    },
+    destination: (req, file, cb) => cb(null, UPLOADS_DIR),
     filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
         cb(null, `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`);
     },
 });
@@ -25,7 +23,7 @@ const fileFilter = (req, file, cb) => {
     if (mimeType && extName) {
         cb(null, true);
     } else {
-        cb(new Error('Apenas imagens (JPEG, JPG, PNG, GIF) são permitidas.'));
+        cb(new Error('Apenas imagens (JPEG, JPG, PNG) são permitidas.'));
     }
 };
 
@@ -38,4 +36,4 @@ const upload = multer({
     { name: 'backImage', maxCount: 1 }, // Verso
 ]);
 
-module.exports = upload;
+export default upload;

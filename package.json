@@ -1,9 +1,11 @@
 {
   "name": "externalsapis",
   "version": "1.0.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
@@ -11,9 +13,12 @@
   "description": "",
   "dependencies": {
     "@google-cloud/vision": "^4.3.2",
+    "cpf-cnpj-validator": "^1.0.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
+    "loader": "^2.1.1",
     "multer": "^1.4.5-lts.1",
-    "nodemon": "^3.1.7"
+    "nodemon": "^3.1.7",
+    "sharp": "^0.33.5"
   }
 }
