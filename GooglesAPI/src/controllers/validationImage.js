@@ -5,12 +5,10 @@ import { cpf as cpfValidator } from 'cpf-cnpj-validator';
 
 // Regexes específicas
 const regexCpf = /(?:CPF|C\.?P\.?F\.?):?\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/i;
-const regexDate = /\b\d{2}\/\d{2}\/\d{4}\b/; // Datas no formato DD/MM/YYYY
+const regexDate = /\b\d{2}\/\d{2}\/\d{4}\b/; // datas no formato DD/MM/YYYY
 const regexRg = /\b\d{2}\.\d{3}\.\d{3}-?\d?\b/; // RG no formato XX.XXX.XXX-X
-const regexParents = /(?:Filiação|Pai|Mãe):?\s*([\s\S]+?)\n/i; 
-const regexNaturalidade = /(Naturalidade|NATURALIDADE):?\s*(.+)/i;
-
-// Pré-processamento da imagem
+//TODO  verificar o pq a naturalidade nao esta sendo extraida corretamente
+// preprocessamento da imagem
 const preprocessImage = async (imagePath) => {
     const outputPath = `${imagePath}-processed.png`;
     await sharp(imagePath)
@@ -31,14 +29,24 @@ const getFieldNearLabel = (textLines, label, offset = 1) => {
     return null;
 };
 
-// Função para capturar filiação
+// funcai para pegar filiação
 const extractParents = (textLines) => {
     const parentsIndex = textLines.findIndex((line) =>
         line.toLowerCase().includes('filiação')
     );
     if (parentsIndex !== -1) {
-        const parentLines = textLines.slice(parentsIndex + 1, parentsIndex + 3); // Captura as duas linhas seguintes
-        return parentLines.join(' ').trim(); // Une os nomes em uma única string
+        const parentLines = textLines.slice(parentsIndex + 1, parentsIndex + 3); // pega as duas linhas seguintes
+        return parentLines.join(' ').trim(); // Une os nomes em uma so string
+    }
+    return null;
+};
+
+const extractNaturalidade = (textLines) => {
+    const naturalidadeLine = textLines.find((line) =>
+        line.toLowerCase().includes('naturalidade')
+    );
+    if (naturalidadeLine) {
+        return naturalidadeLine.replace(/.*naturalidade:?\s*/i, '').trim();
     }
     return null;
 };
@@ -53,7 +61,7 @@ const analyzeImages = async (req, res) => {
         const frontImagePath = req.files.frontImage[0].path;
         const backImagePath = req.files.backImage[0].path;
 
-        // Pré-processamento
+        // Preprocessamento
         const processedFront = await preprocessImage(frontImagePath);
         const processedBack = await preprocessImage(backImagePath);
 
@@ -79,8 +87,8 @@ const analyzeImages = async (req, res) => {
         const cpfValid = cpf && cpfValidator.isValid(cpf) ? cpf : null;
         const birthDate = textLines.find((line) => regexDate.test(line))?.match(regexDate)?.[0] || null;
         const rg = textLines.find((line) => regexRg.test(line))?.match(regexRg)?.[0] || null;
-        const parents = extractParents(textLines); // Chama a função dinâmica para capturar os nomes
-        const naturalidade = textLines.find((line) => line.toLowerCase().includes('naturalidade')) || null;
+        const parents = extractParents(textLines);
+        const naturalidade = extractNaturalidade(textLines); // Captura apenas o valor da naturalidade
 
         res.json({
             message: 'Dados extraídos com sucesso',

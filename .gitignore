@@ -2,3 +2,4 @@ GooglesAPI/GoogleKeyVisionAPI.json
 node_modules
 package-lock.json
 .env
+GooglesAPI/uploads
