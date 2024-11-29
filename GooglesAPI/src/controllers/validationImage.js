@@ -2,14 +2,19 @@ import client from '../config/googleConfig.js';
 import fs from 'fs/promises';
 import sharp from 'sharp';
 import { cpf as cpfValidator } from 'cpf-cnpj-validator';
-import { getFieldValueAfterLabel, extractParents, extractNaturalidade } from './utils.js'
+import {
+    getFieldValueAfterLabel,
+    extractParents,
+    extractNaturalidade,
+}
+from "./utils.js"
 
 // Regexes específicas
 const CPF_REGEX = /(?:CPF|C\.?P\.?F\.?):?\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/i;
 const DATE_REGEX = /\b\d{2}\/\d{2}\/\d{4}\b/;
 const RG_REGEX = /\b\d{2}\.\d{3}\.\d{3}-?\d?\b/;
 
-// Pré-processamento da imagem do RG
+// Pré-processamento da imagem
 const preprocessRgImage = async (imagePath) => {
     const outputPath = `${imagePath}-processed.png`;
     await sharp(imagePath)
@@ -32,7 +37,7 @@ const extractPersonalData = (textLines) => {
     return { name, cpf: cpfValid, birthDate, rg };
 };
 
-// Controlador principal
+// Controlador principal para RG
 const analyzeImages = async (req, res) => {
     try {
         if (!req.files?.frontImage || !req.files?.backImage) {
@@ -49,11 +54,11 @@ const analyzeImages = async (req, res) => {
         // OCR nas imagens
         const [frontResult] = await client.textDetection(processedFront);
         const frontText = frontResult.textAnnotations?.[0]?.description || '';
-        
+
         const [backResult] = await client.textDetection(processedBack);
         const backText = backResult.textAnnotations?.[0]?.description || '';
-        console.log(frontResult); 
-       // console.log(backResult);
+        console.log('Texto OCR - Frente:', frontText);
+        console.log('Texto OCR - Verso:', backText);
 
         // Remove os arquivos temporários
         await fs.unlink(frontImagePath);
@@ -61,7 +66,7 @@ const analyzeImages = async (req, res) => {
         await fs.unlink(processedFront);
         await fs.unlink(processedBack);
 
-        // Divide o texto em linhas 
+        // Divide o texto em linhas
         const textLines = `${frontText}\n${backText}`.split('\n').map((line) => line.trim());
 
         // Extração de campos
@@ -78,7 +83,6 @@ const analyzeImages = async (req, res) => {
                 rg,
                 parents,
                 naturalidade,
-
             },
         });
     } catch (error) {
@@ -87,4 +91,7 @@ const analyzeImages = async (req, res) => {
     }
 };
 
-export default analyzeImages;
+// Controlador para CNH
+
+
+export default  analyzeImages ;
