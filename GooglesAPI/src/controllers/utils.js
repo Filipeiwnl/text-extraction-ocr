@@ -1,3 +1,7 @@
+const CPF_REGEX = /(?:CPF|C\.?P\.?F\.?):?\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/i;
+const DATE_REGEX = /\b\d{2}\/\d{2}\/\d{4}\b/;
+
+// Função para buscar valores próximos de um rótulo
 const getFieldValueAfterLabel = (textLines, label, offset = 1) => {
     const index = textLines.findIndex((line) => line.toLowerCase().includes(label.toLowerCase()));
     return index !== -1 && index + offset < textLines.length
@@ -5,7 +9,7 @@ const getFieldValueAfterLabel = (textLines, label, offset = 1) => {
         : null;
 };
 
-// Função para extrair filiação
+// Função para extrair filiação (específica para RGs)
 const extractParents = (textLines) => {
     const parentsIndex = textLines.findIndex((line) =>
         line.toLowerCase().includes('filiação')
@@ -17,32 +21,30 @@ const extractParents = (textLines) => {
     return null;
 };
 
+// Função para extrair naturalidade (específica para RGs)
 const extractNaturalidade = (textLines) => {
-    // Lista de estados brasileiros válidos
     const validStates = ['AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MT', 'MS', 'MG', 'PA', 'PB', 'PR', 'PE', 'PI', 'RJ', 'RN', 'RS', 'RO', 'RR', 'SC', 'SP', 'SE', 'TO'];
-
-    // Regex para identificar padrões de cidade/estado
     const cityStateRegex = /\b([a-záéíóúãõç\s]+)\/([a-z]{2})\b/i;
 
-    // Itera sobre as linhas para encontrar o padrão correto
     for (let i = 0; i < textLines.length; i++) {
         const line = textLines[i];
-
-        // ve se a linha tem um padrão de cidade/estado
         const match = line.match(cityStateRegex);
         if (match) {
-            const city = match[1].trim(); // Extrai a cidade
-            const state = match[2].toUpperCase(); // Extrai o estado
-
-            // Verifica se o estado é válido
+            const city = match[1].trim();
+            const state = match[2].toUpperCase();
             if (validStates.includes(state)) {
-                return `${city}/${state}`; // Retorna a naturalidade no formato Cidade/Estado
+                return `${city}/${state}`;
             }
         }
     }
 
-    //retorna null se nada for encontrado
     return null;
 };
 
-export { getFieldValueAfterLabel, extractParents, extractNaturalidade }
+// Exporta as funções
+export {
+    getFieldValueAfterLabel,
+    extractParents,
+    extractNaturalidade,
+    
+};

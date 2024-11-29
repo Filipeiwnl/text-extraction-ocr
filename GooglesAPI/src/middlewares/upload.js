@@ -36,4 +36,12 @@ const upload = multer({
     { name: 'backImage', maxCount: 1 }, // Verso
 ]);
 
-export default upload;
+const uploadCnh = multer({
+    storage,
+    fileFilter,
+    limits: { fileSize: MAX_FILE_SIZE },
+}).fields([
+    { name: 'frontImage', maxCount: 1 }, // Frente
+]);
+
+export {upload, uploadCnh};
