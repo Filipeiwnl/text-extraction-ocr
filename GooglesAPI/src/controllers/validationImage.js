@@ -6,19 +6,16 @@ import {
     getFieldValueAfterLabel,
     extractParents,
     extractNaturalidade,
-}
-from "./utils.js"
+} from './utils.js';
 
-// Regexes específicas
 const CPF_REGEX = /(?:CPF|C\.?P\.?F\.?):?\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/i;
 const DATE_REGEX = /\b\d{2}\/\d{2}\/\d{4}\b/;
 const RG_REGEX = /\b\d{2}\.\d{3}\.\d{3}-?\d?\b/;
 
-// Pré-processamento da imagem
-const preprocessRgImage = async (imagePath) => {
+const preprocessImage = async (imagePath, width = 800) => {
     const outputPath = `${imagePath}-processed.png`;
     await sharp(imagePath)
-        .resize(800) // Redimensiona para 800 pixels de largura
+        .resize(width)
         .grayscale()
         .normalise()
         .sharpen()
@@ -26,7 +23,6 @@ const preprocessRgImage = async (imagePath) => {
     return outputPath;
 };
 
-// Extrai dados pessoais (nome, CPF, data de nascimento, RG)
 const extractPersonalData = (textLines) => {
     const name = getFieldValueAfterLabel(textLines, 'nome');
     const cpf = textLines.find((line) => CPF_REGEX.test(line))?.match(CPF_REGEX)?.[1] || null;
@@ -37,7 +33,6 @@ const extractPersonalData = (textLines) => {
     return { name, cpf: cpfValid, birthDate, rg };
 };
 
-// Controlador principal para RG
 const analyzeImages = async (req, res) => {
     try {
         if (!req.files?.frontImage || !req.files?.backImage) {
@@ -47,29 +42,28 @@ const analyzeImages = async (req, res) => {
         const frontImagePath = req.files.frontImage[0].path;
         const backImagePath = req.files.backImage[0].path;
 
-        // Pré-processamento
-        const processedFront = await preprocessRgImage(frontImagePath);
-        const processedBack = await preprocessRgImage(backImagePath);
+        const processedFront = await preprocessImage(frontImagePath);
+        const processedBack = await preprocessImage(backImagePath);
 
-        // OCR nas imagens
         const [frontResult] = await client.textDetection(processedFront);
         const frontText = frontResult.textAnnotations?.[0]?.description || '';
 
         const [backResult] = await client.textDetection(processedBack);
         const backText = backResult.textAnnotations?.[0]?.description || '';
-        console.log('Texto OCR - Frente:', frontText);
-        console.log('Texto OCR - Verso:', backText);
 
-        // Remove os arquivos temporários
+        if (!frontResult.textAnnotations || !backResult.textAnnotations) {
+            return res.status(400).json({ error: 'Falha ao extrair texto das imagens.' });
+        }
+
+        console.log('OCR Resultado - Frente:', JSON.stringify(frontResult.textAnnotations, null, 2));
+        console.log('OCR Resultado - Verso:', JSON.stringify(backResult.textAnnotations, null, 2));
+
         await fs.unlink(frontImagePath);
         await fs.unlink(backImagePath);
         await fs.unlink(processedFront);
         await fs.unlink(processedBack);
 
-        // Divide o texto em linhas
         const textLines = `${frontText}\n${backText}`.split('\n').map((line) => line.trim());
-
-        // Extração de campos
         const { name, cpf, birthDate, rg } = extractPersonalData(textLines);
         const parents = extractParents(textLines);
         const naturalidade = extractNaturalidade(textLines);
@@ -84,14 +78,15 @@ const analyzeImages = async (req, res) => {
                 parents,
                 naturalidade,
             },
+            source: {
+                frontText: frontText || 'Nenhum texto extraído',
+                backText: backText || 'Nenhum texto extraído',
+            },
         });
     } catch (error) {
-        console.error('Erro ao processar as imagens:', error.message, error.stack); // Log do stack trace
+        console.error('Erro ao processar as imagens:', error.message, error.stack);
         res.status(500).json({ error: 'Erro ao processar as imagens', details: error.message });
     }
 };
 
-// Controlador para CNH
-
-
-export default  analyzeImages ;
+export { analyzeImages };
