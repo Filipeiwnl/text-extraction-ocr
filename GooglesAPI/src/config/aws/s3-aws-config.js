@@ -1,10 +1,14 @@
-import aws from 'aws-sdk'
+import AWS from 'aws-sdk'
 import dotenv from 'dotenv'
 
 dotenv.config()
 
-const s3 = new s3 ({
-    acessKey: qlqercoisa,
-    secretAcessKey:criarconta,
-    region: pg
+const acesskey = process.env.ACESSKEY
+const secretAcessKey = process.env.SECRETACESSKEY
+
+AWS.config.update({region: 'us-west-2'});
+const AWS = new aws ({
+    acessKey: acesskey,
+    secretAcessKey:secretAcessKey,
+  //  region: pg
 })
