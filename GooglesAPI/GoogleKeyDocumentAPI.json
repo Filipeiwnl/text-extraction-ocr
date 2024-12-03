@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "fleet-gamma-442922-q6",
+  "private_key_id": "4970590dd6f31ff2f06cf713dcefbccbbd4161b5",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCjRn4tkgaA95jv\nzF3bk9tqzR6785hw4YE75tcc5d3SYswIVZZCHDplO2UYUelSpPXVmM0uHMsgM1j3\n3Oy9emecJSeKvuR4NgdNFQZTH1VTSQivFiDaaJUym0gL3klGf+lL9FEFTimOaMWI\nDLAFo/5WrBQKpEudwc6xtsrcXHlkUKYrOv2Fdf0vO9CYt3tVTkqM6UE2k9TiteOz\nkBrSHaAYbx139WJGbvU+vgR6sT+F6gn3TGGab+FKrEQN2v1Uv9SEPUaeozQzXPh6\nf4m6yWFXofbZH1AI6Qk8zSzTmKTAihcCRLnJjnxBLv9uyLCp6RutgRtxuc3gXloo\nVUPb0yupAgMBAAECggEACYNhdbFE7L3AbPRo4ZLXXX0vFb9nOeiBuaZFEVt5VblI\n7xFhjF+NrXlM9iJLqHORGU1qYw3tbeZgAC0gpBeeMtRdXfGqaTCosz6O3Ef+ljgy\np9TvvBoM22J9y6c7eL6aLsFA+UCpHjGPlNI8bU+1UYJ8NnSFLV9t9h/S6Q0AS65p\nc/kBYArJbKF7Dgc8cW2f0HfYqvwmo732P+tJxUTV8lxHzqqwrlp3NF+Lp5TnJ72x\n9xq3vh1ZJqb2KSHovj1i0CnT7+B3gNyvoLpqlLMgUhsurYkhO/lS+ct3pAnoSJ7r\nwDR+PdawfCjHobRpCNiAM2eV8h0ZMJgOxPwxIJs1qwKBgQDQa2+yJ2W4holhrh6W\nmzGqbtp8hzyatlar5+KINkQTnOxnSsZGKCn0kue8DMULtjaPA8jr/OaopS78aLka\ntdnC8613t6FGpeI2KW4dCbXV8CbfBNl8zb4CgdQRA7ZGaTHjWz9pvK23H9UWIYAU\nKTfEvLRbWRRfhKkdmKEzNWONiwKBgQDIjLX8OJwWK7ytojSzeT5/utu06GfYZlKu\ngGMksIZvimmGrkYMZNrfBuWZpGyJ2aIi1oFsxu2qe9lGKfAdaBVL0icmHD7PZSyw\ndKoXkvXpHQfLlnkPh0pWmlxm9zwVKbVurKthH7Ab/k3TAu5j5u3xRxji+nDZi6jx\nidb8hH16GwKBgQCtlk3ZW+bk4Wja6mKfnXKoONvQi/J2CRf25ZNPT6MzkqdzAFxT\nYnBPO2u2vAwBzSlzw/s8Uc7q92lC4RYKoRtVvA7mfxLb/J2D7s2/ca75GKPHbAqY\nX+O5wtgVs7nEuyjJ693M+1DUDLc1T4GVSR8hxOmSi4bkZ2FTPSRFulnIMQKBgQDB\nLlHK0FkCPkU0WHA9hYf/j+Y9QDVvzTjN4Nwfpm8JGKIH2u2c2LXAaitWsXzf2KUG\nu+vV9VVQiJZFsPYbzXveGmQdoM2cB5BhtS93H9gDIjS1FpAsthyUiYKCqJrWo+Oh\n5W/8UYLZpEAhB8zMrND9PogpdCaqV454hFdzzMf1iwKBgFd8rlwxSThCjLQRxphB\naxN8e2hczgZ4WPv8l6ptfwo5nypRpqgbupqtZM0LXQrUqOPg987xs+Bjm56ehtjV\nFcCxTvVPr+7H6rfYXisz4/w/4VHqScPQF4xze8TYsjrDz7Q9QBSrR42Amv6zN0eo\nQRAg4qz4jZvkWy+u3NGEBrT1\n-----END PRIVATE KEY-----\n",
+  "client_email": "documentai@fleet-gamma-442922-q6.iam.gserviceaccount.com",
+  "client_id": "115172588175606025252",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/documentai%40fleet-gamma-442922-q6.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
