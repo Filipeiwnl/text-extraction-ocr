@@ -5,10 +5,10 @@ dotenv.config();
 
 // Configuração do cliente S3
 const s3 = new S3Client({
-    region: process.env.AWS_REGION, // Região do bucket
+    region: process.env.AWS_REGION,
     credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID, // Chave de acesso do IAM
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY, // Chave secreta do IAM
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     },
 });
 

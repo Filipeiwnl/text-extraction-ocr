@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import fs from 'fs';
 import imageRoutes from './src/routes/imageRoutes.js';
+import s3Routes from './src/routes/s3Routes.js';
 
 dotenv.config();
 
@@ -22,10 +23,12 @@ const initializeDirectories = () => {
 initializeDirectories();
 
 // Middleware para parsing de JSON
-app.use(express.json());
+app.use(express.json({ limit: '10mb' })); // Ajustado para aceitar payloads grandes
+app.use(express.urlencoded({ extended: true }));
 
 // Rotas
 app.use('/api/images', imageRoutes);
+app.use('/s3', s3Routes);
 
 // Rota inicial
 app.get('/', (req, res) => {
