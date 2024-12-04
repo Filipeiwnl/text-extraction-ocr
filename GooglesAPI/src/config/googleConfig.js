@@ -1,8 +1,16 @@
-import vision from '@google-cloud/vision';
+//import { v1 } from '@google-cloud/documentai';
+import {DocumentProcessorServiceClient} from '@google-cloud/documentai'
+import dotenv from 'dotenv';
 
+dotenv.config();
 
-const client = new vision.ImageAnnotatorClient({
-    keyFilename: './GoogleKeyVisionAPI.json', 
+const teste = process.env.GOOGLE_APPLICATION_CREDENTIALS
+// Configuração do cliente Document AI
+const client = new DocumentProcessorServiceClient({
+
+    keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
+
+//console.log(client.getProcessorVersion())  
 
 export default client;

@@ -1,2 +1,5 @@
 node_modules
 uploads
+.env
+GooglesAPI/GoogleKeyDocumentAPI.json
+GooglesAPI/GoogleKeyVisionAPI.json

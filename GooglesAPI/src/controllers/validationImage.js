@@ -1,79 +1,84 @@
-import client from '../config/googleConfig.js';
-import fs from 'fs/promises';
-import sharp from 'sharp';
-import { cpf as cpfValidator } from 'cpf-cnpj-validator';
-import {
-    getFieldValueAfterLabel,
-    extractParents,
-    extractNaturalidade,
-}
-from "./utils.js"
+import client from '../config/googleConfig.js'; // Configuração do Document AI
+import { downloadFromS3 } from '../services/s3Service.js'; // Serviço de download do S3
+import { getFieldValueAfterLabel, extractParents, extractNaturalidade } from './utils.js';
+import dotenv from 'dotenv';
 
-// Regexes específicas
+dotenv.config();
+
 const CPF_REGEX = /(?:CPF|C\.?P\.?F\.?):?\s*(\d{3}\.\d{3}\.\d{3}-\d{2})/i;
 const DATE_REGEX = /\b\d{2}\/\d{2}\/\d{4}\b/;
 const RG_REGEX = /\b\d{2}\.\d{3}\.\d{3}-?\d?\b/;
 
-// Pré-processamento da imagem
-const preprocessRgImage = async (imagePath) => {
-    const outputPath = `${imagePath}-processed.png`;
-    await sharp(imagePath)
-        .resize(800) // Redimensiona para 800 pixels de largura
-        .grayscale()
-        .normalise()
-        .sharpen()
-        .toFile(outputPath);
-    return outputPath;
+// Função para extrair a chave (key) de um objeto do S3 a partir da URL
+const extractKeyFromUrl = (url, bucketName) => {
+    const baseUrl = `https://${bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/`;
+    if (url.startsWith(baseUrl)) {
+        return url.replace(baseUrl, '');
+    }
+    throw new Error('Chave do objeto S3 não pôde ser determinada a partir da URL.');
 };
 
-// Extrai dados pessoais (nome, CPF, data de nascimento, RG)
+// Função para extrair dados pessoais
 const extractPersonalData = (textLines) => {
     const name = getFieldValueAfterLabel(textLines, 'nome');
     const cpf = textLines.find((line) => CPF_REGEX.test(line))?.match(CPF_REGEX)?.[1] || null;
-    const cpfValid = cpf && cpfValidator.isValid(cpf) ? cpf : null;
     const birthDate = textLines.find((line) => DATE_REGEX.test(line))?.match(DATE_REGEX)?.[0] || null;
     const rg = textLines.find((line) => RG_REGEX.test(line))?.match(RG_REGEX)?.[0] || null;
 
-    return { name, cpf: cpfValid, birthDate, rg };
+    return { name, cpf, birthDate, rg };
 };
 
-// Controlador principal para RG
+// Processar imagens e extrair dados
 const analyzeImages = async (req, res) => {
     try {
-        if (!req.files?.frontImage || !req.files?.backImage) {
-            return res.status(400).json({ error: 'Imagens de frente e verso são obrigatórias.' });
+        // Verificação de URLs do S3 fornecidas
+        if (!req.s3Urls?.frontImage || !req.s3Urls?.backImage) {
+            return res.status(400).json({ error: 'URLs das imagens são obrigatórias.' });
         }
 
-        const frontImagePath = req.files.frontImage[0].path;
-        const backImagePath = req.files.backImage[0].path;
+        const bucketName = process.env.S3_BUCKET_NAME;
 
-        // Pré-processamento
-        const processedFront = await preprocessRgImage(frontImagePath);
-        const processedBack = await preprocessRgImage(backImagePath);
+        // Extrair chaves das URLs do S3
+        const frontKey = extractKeyFromUrl(req.s3Urls.frontImage, bucketName);
+        const backKey = extractKeyFromUrl(req.s3Urls.backImage, bucketName);
 
-        // OCR nas imagens
-        const [frontResult] = await client.textDetection(processedFront);
-        const frontText = frontResult.textAnnotations?.[0]?.description || '';
+        // Baixar arquivos do S3
+        const frontImageBuffer = await downloadFromS3(frontKey);
+        const backImageBuffer = await downloadFromS3(backKey);
 
-        const [backResult] = await client.textDetection(processedBack);
-        const backText = backResult.textAnnotations?.[0]?.description || '';
-        console.log('Texto OCR - Frente:', frontText);
-        console.log('Texto OCR - Verso:', backText);
+        // Função para processar documentos no Google Document AI
+        const processDocument = async (fileBuffer) => {
+            const fileContent = fileBuffer.toString('base64'); // Converte para Base64
+            const [result] = await client.processDocument({
+            //name: `https://us-documentai.googleapis.com/v1/projects/903085703836/locations/us/processors/5d2a5e32f798a24a:process`,
+            name: `projects/${process.env.PROJECT_ID}/locations/${process.env.REGION}/processors/${process.env.PROCESSOR_ID}`,
+                rawDocument: {
+                    content: fileContent,
+                    mimeType: 'image/jpeg', // Ajustar conforme necessário
+                },
+            });
+            return result.document;
+        };
 
-        // Remove os arquivos temporários
-        await fs.unlink(frontImagePath);
-        await fs.unlink(backImagePath);
-        await fs.unlink(processedFront);
-        await fs.unlink(processedBack);
+        // Processar imagens usando o Document AI
+        const frontResult = await processDocument(frontImageBuffer);
+        const backResult = await processDocument(backImageBuffer);
 
-        // Divide o texto em linhas
-        const textLines = `${frontText}\n${backText}`.split('\n').map((line) => line.trim());
+        // Verificar se os textos foram extraídos
+        if (!frontResult.text || !backResult.text) {
+            return res.status(400).json({ error: 'Falha ao extrair texto das imagens.' });
+        }
 
-        // Extração de campos
+        // Extrair linhas de texto e processar dados
+        const textLines = `${frontResult.text}\n${backResult.text}`
+            .split('\n')
+            .map((line) => line.trim());
+
         const { name, cpf, birthDate, rg } = extractPersonalData(textLines);
         const parents = extractParents(textLines);
         const naturalidade = extractNaturalidade(textLines);
 
+        // Retornar resposta com os dados extraídos
         res.json({
             message: 'Dados extraídos com sucesso',
             data: {
@@ -84,14 +89,19 @@ const analyzeImages = async (req, res) => {
                 parents,
                 naturalidade,
             },
+            source: {
+                frontText: frontResult.text || 'Nenhum texto extraído',
+                backText: backResult.text || 'Nenhum texto extraído',
+            },
         });
     } catch (error) {
-        console.error('Erro ao processar as imagens:', error.message, error.stack); // Log do stack trace
-        res.status(500).json({ error: 'Erro ao processar as imagens', details: error.message });
+        console.error('Erro ao processar as imagens:', error.message, error.stack);
+        res.status(500).json({
+            error: 'Erro ao processar as imagens',
+            details: error.message,
+        });
     }
 };
 
-// Controlador para CNH
-
-
-export default  analyzeImages ;
+export default analyzeImages;
+    
