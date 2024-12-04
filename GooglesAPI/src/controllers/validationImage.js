@@ -50,7 +50,6 @@ const analyzeImages = async (req, res) => {
         const processDocument = async (fileBuffer) => {
             const fileContent = fileBuffer.toString('base64'); // Converte para Base64
             const [result] = await client.processDocument({
-            //name: `https://us-documentai.googleapis.com/v1/projects/903085703836/locations/us/processors/5d2a5e32f798a24a:process`,
             name: `projects/${process.env.PROJECT_ID}/locations/${process.env.REGION}/processors/${process.env.PROCESSOR_ID}`,
                 rawDocument: {
                     content: fileContent,
