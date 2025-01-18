@@ -49,13 +49,9 @@ O projeto segue uma arquitetura simples:
 
 - **Iniciar o projeto**:
   ```bash
-  node index.js
+ npm start
   ```
 
-- **Testar com imagens de exemplo**:
-  ```bash
-  node test.js
-  ```
 
 ## Contribuição
 
