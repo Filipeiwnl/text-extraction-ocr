@@ -49,8 +49,8 @@ O projeto segue uma arquitetura simples:
 
 - **Iniciar o projeto**:
   ```bash
- npm start
-  ```
+  npm start
+```
 
 
 ## Contribuição
